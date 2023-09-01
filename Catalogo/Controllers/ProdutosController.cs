@@ -57,7 +57,7 @@ namespace ApiCatalogo.Controllers
         {
             if (id != produto.ProdutoId)
             {
-                return BadRequest();
+                return BadRequest("Id do produto não existe!");
             }
 
             _context.Entry(produto).State = EntityState.Modified;
@@ -70,7 +70,7 @@ namespace ApiCatalogo.Controllers
             {
                 if (!ProdutoExists(id))
                 {
-                    return NotFound();
+                    return NotFound("Id do produto não existe!");
                 }
                 else
                 {
@@ -102,12 +102,12 @@ namespace ApiCatalogo.Controllers
         {
             if (_context.Produtos == null)
             {
-                return NotFound();
+                return NotFound("Não existem produtos!");
             }
             var produto = await _context.Produtos.FindAsync(id);
             if (produto == null)
             {
-                return NotFound();
+                return NotFound("Id do produto não existe!");
             }
 
             _context.Produtos.Remove(produto);

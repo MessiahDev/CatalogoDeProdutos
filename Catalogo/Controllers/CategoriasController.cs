@@ -27,7 +27,7 @@ namespace ApiCatalogo.Controllers
         {
           if (_context.Categorias == null)
           {
-              return NotFound();
+              return NotFound("Não existem categorias!");
           }
             return await _context.Categorias.ToListAsync();
         }
@@ -38,13 +38,13 @@ namespace ApiCatalogo.Controllers
         {
           if (_context.Categorias == null)
           {
-              return NotFound();
+              return NotFound("Não há categorias cadastradas!");
           }
             var categoria = await _context.Categorias.FindAsync(id);
 
             if (categoria == null)
             {
-                return NotFound();
+                return NotFound("Categoria não encontrada!");
             }
 
             return categoria;
@@ -57,7 +57,7 @@ namespace ApiCatalogo.Controllers
         {
             if (id != categoria.CategoriaId)
             {
-                return BadRequest();
+                return BadRequest("Id da categoria não existe!");
             }
 
             _context.Entry(categoria).State = EntityState.Modified;
@@ -70,7 +70,7 @@ namespace ApiCatalogo.Controllers
             {
                 if (!CategoriaExists(id))
                 {
-                    return NotFound();
+                    return NotFound("Id da categoria não existe!");
                 }
                 else
                 {
@@ -102,12 +102,12 @@ namespace ApiCatalogo.Controllers
         {
             if (_context.Categorias == null)
             {
-                return NotFound();
+                return NotFound("Id da categoria não existe!");
             }
             var categoria = await _context.Categorias.FindAsync(id);
             if (categoria == null)
             {
-                return NotFound();
+                return NotFound("Id da categoria não existe!");
             }
 
             _context.Categorias.Remove(categoria);
