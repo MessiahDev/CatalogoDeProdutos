@@ -19,6 +19,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Api Catálogo de Produtos",
+        Version = "1.0",
+        Description = "CRUD de Produtos e Categorias.",
+        Contact = new OpenApiContact
+        {
+            Name = "Alex M. Alle",
+            Email = "alexmessias_18@yahoo.com.br",
+        },
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,23 +42,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("Versão 1.0", new OpenApiInfo
-    {
-        Title = "Api Catálogo de Produtos",
-        Version = "Versão 1.0",
-        Description = "CRUD de Produtos e Categorias.",
-        Contact = new OpenApiContact
-        {
-            Name = "Alex Alle",
-            Email = "alexmessias_18@yahoo.com.br",
-        },
-    });
-});
-
-
 
 app.UseHttpsRedirection();
 
