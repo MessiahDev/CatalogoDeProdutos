@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Catalogo.Context;
 using Catalogo.Models;
+using ApiCatalogo.Services.Interfaces;
 
 namespace ApiCatalogo.Controllers
 {
@@ -9,33 +9,33 @@ namespace ApiCatalogo.Controllers
     [ApiController]
     public class ProdutosController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IRepositoryServices _context;
 
-        public ProdutosController(AppDbContext context)
+        public ProdutosController(IRepositoryServices context)
         {
             _context = context;
         }
 
         // GET: api/Produtos
-        [HttpGet]
+        [HttpGet("Produtos")]
         public async Task<ActionResult<IEnumerable<Produto>>> GetProdutos()
         {
-          if (_context.Produtos == null)
+          if (_context.ProdutoRepository == null)
           {
               return NotFound("Produtos não encontrados!");
           }
-            return await _context.Produtos.AsNoTracking().ToListAsync();
+            return await _context.ProdutoRepository.Get().AsNoTracking().ToListAsync();
         }
 
         // GET: api/Produtos/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Produto>> GetProduto(int id)
+        public ActionResult<Produto> GetProduto(int id)
         {
-          if (_context.Produtos == null)
+          if (_context.ProdutoRepository == null)
           {
               return NotFound("Não há produdos cadastrados!");
           }
-            var produto = await _context.Produtos.FindAsync(id);
+            var produto = _context.ProdutoRepository.GetById(p => p.ProdutoId == id);
 
             if (produto == null)
             {
@@ -45,21 +45,38 @@ namespace ApiCatalogo.Controllers
             return produto;
         }
 
+        // GET: api/Produtos/PrecoOrdemCrescente
+        [HttpGet("PrecoOrdemCrescente")]
+        public ActionResult<IEnumerable<Produto>> GetProdutosPorPreco(int id)
+        {
+            if (_context.ProdutoRepository == null)
+            {
+                return NotFound("Não há produdos cadastrados!");
+            }
+            var produtos = _context.ProdutoRepository.GetProdutosPorPreco().ToList();
+
+            if (produtos == null)
+            {
+                return NotFound("Produtos não encontrados!");
+            }
+
+            return produtos;
+        }
+
         // PUT: api/Produtos/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduto(int id, Produto produto)
+        public IActionResult PutProduto(int id, Produto produto)
         {
             if (id != produto.ProdutoId)
             {
                 return BadRequest("Id do produto não existe!");
             }
 
-            _context.Entry(produto).State = EntityState.Modified;
+            _context.ProdutoRepository.Update(produto);
 
             try
             {
-                await _context.SaveChangesAsync();
+                _context.Commit();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -77,43 +94,43 @@ namespace ApiCatalogo.Controllers
         }
 
         // POST: api/Produtos
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Produto>> PostProduto(Produto produto)
+        public ActionResult<Produto> PostProduto(Produto produto)
         {
-          if (_context.Produtos == null)
+          if (_context.ProdutoRepository == null)
           {
               return Problem("Entity set 'AppDbContext.Produtos'  is null.");
           }
-            _context.Produtos.Add(produto);
-            await _context.SaveChangesAsync();
+            _context.ProdutoRepository.Add(produto);
+            _context.Commit();
 
             return CreatedAtAction("GetProduto", new { id = produto.ProdutoId }, produto);
         }
 
         // DELETE: api/Produtos/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduto(int id)
+        public IActionResult DeleteProduto(int id)
         {
-            if (_context.Produtos == null)
+            if (_context.ProdutoRepository == null)
             {
                 return NotFound("Não existem produtos!");
             }
-            var produto = await _context.Produtos.FindAsync(id);
+            var produto = _context.ProdutoRepository.GetById(p => p.ProdutoId == id);
             if (produto == null)
             {
                 return NotFound("Id do produto não existe!");
             }
 
-            _context.Produtos.Remove(produto);
-            await _context.SaveChangesAsync();
+            _context.ProdutoRepository.Delete(produto);
+            _context.Commit();
 
             return NoContent();
         }
 
         private bool ProdutoExists(int id)
         {
-            return (_context.Produtos?.Any(e => e.ProdutoId == id)).GetValueOrDefault();
+            var produto = _context.ProdutoRepository.Get().AsNoTracking();
+            return produto.Any(e => e.ProdutoId == id);
         }
     }
 }

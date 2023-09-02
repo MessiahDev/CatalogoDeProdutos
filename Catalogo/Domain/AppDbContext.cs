@@ -1,7 +1,7 @@
 ﻿using Catalogo.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Catalogo.Context;
+namespace Catalogo.Domain;
 
 public class AppDbContext : DbContext
 {

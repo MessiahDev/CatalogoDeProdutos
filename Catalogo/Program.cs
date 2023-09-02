@@ -1,4 +1,6 @@
-using Catalogo.Context;
+using ApiCatalogo.Services;
+using ApiCatalogo.Services.Interfaces;
+using Catalogo.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -16,6 +18,8 @@ var mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnecti
 builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseMySql(mySqlConnection,
             ServerVersion.AutoDetect(mySqlConnection)));
+
+builder.Services.AddScoped<IRepositoryServices, RepositoryServices>();
 
 builder.Services.AddControllers();
 

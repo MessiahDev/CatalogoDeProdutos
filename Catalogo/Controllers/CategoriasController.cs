@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Catalogo.Context;
 using Catalogo.Models;
+using ApiCatalogo.Services.Interfaces;
 
 namespace ApiCatalogo.Controllers
 {
@@ -9,9 +9,9 @@ namespace ApiCatalogo.Controllers
     [ApiController]
     public class CategoriasController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IRepositoryServices _context;
 
-        public CategoriasController(AppDbContext context)
+        public CategoriasController(IRepositoryServices context)
         {
             _context = context;
         }
@@ -20,22 +20,22 @@ namespace ApiCatalogo.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Categoria>>> GetCategorias()
         {
-          if (_context.Categorias == null)
+          if (_context.CategoriaRepository == null)
           {
               return NotFound("Não existem categorias!");
           }
-            return await _context.Categorias.AsNoTracking().ToListAsync();
+            return await _context.CategoriaRepository.Get().AsNoTracking().ToListAsync();
         }
 
         // GET: api/Categorias/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Categoria>> GetCategoria(int id)
+        public ActionResult<Categoria> GetCategoria(int id)
         {
-          if (_context.Categorias == null)
-          {
-              return NotFound("Não há categorias cadastradas!");
-          }
-            var categoria = await _context.Categorias.FindAsync(id);
+            if (_context.CategoriaRepository == null)
+            {
+                return NotFound("Não há categorias cadastradas!");
+            }
+            var categoria = _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
 
             if (categoria == null)
             {
@@ -46,20 +46,19 @@ namespace ApiCatalogo.Controllers
         }
 
         // PUT: api/Categorias/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategoria(int id, Categoria categoria)
+        public IActionResult PutCategoria(int id, Categoria categoria)
         {
             if (id != categoria.CategoriaId)
             {
                 return BadRequest("Id da categoria não existe!");
             }
 
-            _context.Entry(categoria).State = EntityState.Modified;
+            _context.CategoriaRepository.Update(categoria);
 
             try
             {
-                await _context.SaveChangesAsync();
+                _context.Commit();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -77,43 +76,43 @@ namespace ApiCatalogo.Controllers
         }
 
         // POST: api/Categorias
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Categoria>> PostCategoria(Categoria categoria)
+        public ActionResult<Categoria> PostCategoria(Categoria categoria)
         {
-          if (_context.Categorias == null)
-          {
-              return Problem("Entity set 'AppDbContext.Categorias'  is null.");
-          }
-            _context.Categorias.Add(categoria);
-            await _context.SaveChangesAsync();
+            if (_context.CategoriaRepository == null)
+            {
+                return Problem("Entity set 'AppDbContext.Categorias'  is null.");
+            }
+            _context.CategoriaRepository.Add(categoria);
+            _context.Commit();
 
             return CreatedAtAction("GetCategoria", new { id = categoria.CategoriaId }, categoria);
         }
 
         // DELETE: api/Categorias/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategoria(int id)
+        public IActionResult DeleteCategoria(int id)
         {
-            if (_context.Categorias == null)
+            if (_context.CategoriaRepository == null)
             {
                 return NotFound("Id da categoria não existe!");
             }
-            var categoria = await _context.Categorias.FindAsync(id);
+            var categoria = _context.CategoriaRepository.GetById(p => p.CategoriaId == id);
             if (categoria == null)
             {
                 return NotFound("Id da categoria não existe!");
             }
 
-            _context.Categorias.Remove(categoria);
-            await _context.SaveChangesAsync();
+            _context.CategoriaRepository.Delete(categoria);
+            _context.Commit();
 
             return NoContent();
         }
 
         private bool CategoriaExists(int id)
         {
-            return (_context.Categorias?.Any(e => e.CategoriaId == id)).GetValueOrDefault();
+            var categoria = _context.CategoriaRepository.Get().AsNoTracking();
+            return (categoria.Any(e => e.CategoriaId == id));
         }
     }
 }
