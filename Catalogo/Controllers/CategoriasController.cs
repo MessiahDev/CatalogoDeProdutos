@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Catalogo.Context;
 using Catalogo.Models;
@@ -29,7 +24,7 @@ namespace ApiCatalogo.Controllers
           {
               return NotFound("Não existem categorias!");
           }
-            return await _context.Categorias.ToListAsync();
+            return await _context.Categorias.AsNoTracking().ToListAsync();
         }
 
         // GET: api/Categorias/5

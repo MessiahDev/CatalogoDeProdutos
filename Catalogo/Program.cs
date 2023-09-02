@@ -1,5 +1,6 @@
 using Catalogo.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("Versão 1.0", new OpenApiInfo
+    {
+        Title = "Api Catálogo de Produtos",
+        Version = "Versão 1.0",
+        Description = "CRUD de Produtos e Categorias.",
+        Contact = new OpenApiContact
+        {
+            Name = "Alex Alle",
+            Email = "alexmessias_18@yahoo.com.br",
+        },
+    });
+});
+
+
 
 app.UseHttpsRedirection();
 
